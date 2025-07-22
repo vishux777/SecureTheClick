@@ -13,9 +13,11 @@ class SpotTheDangerGame {
     }
 
     init() {
+        console.log('Initializing Spot the Danger game...');
         this.setupEventListeners();
         this.loadLevel();
         this.updateDisplay();
+        console.log('Game initialized. Current level:', this.currentLevel);
     }
 
     generateInterfaces() {
@@ -190,17 +192,35 @@ class SpotTheDangerGame {
 
     loadLevel() {
         const interface = this.interfaces.find(i => i.level === this.currentLevel);
-        if (!interface) return;
+        if (!interface) {
+            console.error('Interface not found for level:', this.currentLevel);
+            return;
+        }
 
-        document.querySelector('h1').innerHTML = `<i class="fas fa-search"></i> ${interface.title}`;
-        document.querySelector('.game-instructions').textContent = interface.description;
-        document.getElementById('dangerInterface').innerHTML = interface.content;
+        // Update UI elements
+        const titleElement = document.querySelector('h1');
+        const instructionsElement = document.querySelector('.game-instructions');
+        const interfaceElement = document.getElementById('dangerInterface');
+        
+        if (titleElement) {
+            titleElement.innerHTML = `<i class="fas fa-search"></i> ${interface.title}`;
+        }
+        if (instructionsElement) {
+            instructionsElement.textContent = interface.description;
+        }
+        if (interfaceElement) {
+            interfaceElement.innerHTML = interface.content;
+        }
         
         this.foundDangers = [];
         this.wrongClicks = 0;
-        this.setupClickHandlers();
-        this.updateFoundCount();
-        this.updateProgress();
+        
+        // Wait a moment for DOM to update before setting up handlers
+        setTimeout(() => {
+            this.setupClickHandlers();
+            this.updateFoundCount();
+            this.updateProgress();
+        }, 100);
     }
 
     setupClickHandlers() {
@@ -264,6 +284,11 @@ class SpotTheDangerGame {
 
     getHint() {
         const interface = this.interfaces.find(i => i.level === this.currentLevel);
+        if (!interface) {
+            this.feedback.show('Please wait for the level to load!', 'warning');
+            return;
+        }
+
         const unFoundDangers = document.querySelectorAll('.danger-element:not(.found)');
         
         if (unFoundDangers.length === 0) {
@@ -275,13 +300,15 @@ class SpotTheDangerGame {
         const hint = randomDanger.dataset.hint || 'Look for something suspicious here!';
         
         // Temporarily highlight the element
-        randomDanger.style.border = '2px dashed #ffe66d';
+        randomDanger.style.border = '3px dashed #ffe66d';
+        randomDanger.style.boxShadow = '0 0 15px rgba(255, 230, 109, 0.5)';
         randomDanger.style.animation = 'pulse 1s ease-in-out 3';
         
         setTimeout(() => {
             randomDanger.style.border = '';
+            randomDanger.style.boxShadow = '';
             randomDanger.style.animation = '';
-        }, 3000);
+        }, 4000);
         
         this.feedback.show(`Hint: ${hint}`, 'info');
         this.score = Math.max(0, this.score - 10); // Penalty for using hint
@@ -344,8 +371,21 @@ class SpotTheDangerGame {
     }
 
     setupEventListeners() {
-        document.getElementById('hintButton').addEventListener('click', () => this.getHint());
-        document.getElementById('nextLevel').addEventListener('click', () => this.nextLevel());
+        const hintButton = document.getElementById('hintButton');
+        const nextLevelButton = document.getElementById('nextLevel');
+        
+        if (hintButton) {
+            hintButton.addEventListener('click', () => {
+                console.log('Hint button clicked');
+                this.getHint();
+            });
+        } else {
+            console.error('Hint button not found!');
+        }
+        
+        if (nextLevelButton) {
+            nextLevelButton.addEventListener('click', () => this.nextLevel());
+        }
     }
 }
 
