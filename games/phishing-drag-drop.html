@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Detective - Cyber Awareness Game</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="game-container">
+            <div class="game-header">
+                <a href="../index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Menu
+                </a>
+                <div class="score-display">
+                    Score: <span id="currentScore">0</span>
+                </div>
+                <div class="level-display">
+                    Level: <span id="currentLevel">1</span>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <h1><i class="fas fa-envelope-open-text"></i> Phishing Detective</h1>
+            <p class="game-instructions">
+                Drag suspicious elements from the email below into the "Dangerous Elements" box. 
+                Be careful - dragging safe elements will cost you points!
+            </p>
+
+            <div id="emailContainer" class="email-container">
+                <!-- Email content will be generated here -->
+            </div>
+
+            <div class="drop-zones">
+                <div class="drop-zone" id="dangerZone">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Dangerous Elements</span>
+                </div>
+                <div class="drop-zone" id="safeZone">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Safe Elements</span>
+                </div>
+            </div>
+
+            <div class="game-controls">
+                <button id="checkAnswers" class="play-btn">
+                    <i class="fas fa-check"></i> Check My Answers
+                </button>
+                <button id="nextLevel" class="play-btn" style="display: none;">
+                    <i class="fas fa-arrow-right"></i> Next Level
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../utils/storage.js"></script>
+    <script src="../utils/feedback.js"></script>
+    <script src="phishing-drag-drop.js"></script>
+</body>
+</html>
