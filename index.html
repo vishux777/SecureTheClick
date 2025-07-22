@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Awareness Game - Interactive Security Training</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="hero">
+            <div class="hero-content">
+                <i class="fas fa-shield-alt hero-icon"></i>
+                <h1>Cyber Awareness Game</h1>
+                <p class="hero-subtitle">Master cybersecurity through interactive challenges</p>
+                <div class="stats-bar">
+                    <div class="stat">
+                        <i class="fas fa-trophy"></i>
+                        <span>Total Score: <span id="totalScore">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-tasks"></i>
+                        <span>Games Completed: <span id="gamesCompleted">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="games-grid">
+            <div class="game-card" data-game="phishing">
+                <div class="game-icon">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="game-content">
+                    <h2>Phishing Detective</h2>
+                    <p>Drag and drop to identify dangerous elements in suspicious emails</p>
+                    <div class="game-stats">
+                        <span class="best-score">Best Score: <span id="phishingBest">0</span></span>
+                        <div class="difficulty-badge beginner">Beginner</div>
+                    </div>
+                </div>
+                <button class="play-btn" onclick="startGame('phishing')">
+                    <i class="fas fa-play"></i> Start Challenge
+                </button>
+            </div>
+
+            <div class="game-card" data-game="matching">
+                <div class="game-icon">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+                <div class="game-content">
+                    <h2>Social Engineering Match</h2>
+                    <p>Match attack techniques with their descriptions and examples</p>
+                    <div class="game-stats">
+                        <span class="best-score">Best Score: <span id="matchingBest">0</span></span>
+                        <div class="difficulty-badge intermediate">Intermediate</div>
+                    </div>
+                </div>
+                <button class="play-btn" onclick="startGame('matching')">
+                    <i class="fas fa-play"></i> Start Challenge
+                </button>
+            </div>
+
+            <div class="game-card" data-game="spot-danger">
+                <div class="game-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="game-content">
+                    <h2>Spot the Danger</h2>
+                    <p>Click on suspicious elements in simulated interfaces</p>
+                    <div class="game-stats">
+                        <span class="best-score">Best Score: <span id="spotBest">0</span></span>
+                        <div class="difficulty-badge advanced">Advanced</div>
+                    </div>
+                </div>
+                <button class="play-btn" onclick="startGame('spot-danger')">
+                    <i class="fas fa-play"></i> Start Challenge
+                </button>
+            </div>
+        </main>
+
+        <section class="learning-tips">
+            <h2><i class="fas fa-lightbulb"></i> Quick Security Tips</h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <i class="fas fa-link"></i>
+                    <h3>Check Links</h3>
+                    <p>Hover over links to see the real destination before clicking</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-lock"></i>
+                    <h3>Strong Passwords</h3>
+                    <p>Use unique, complex passwords with two-factor authentication</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-download"></i>
+                    <h3>Safe Downloads</h3>
+                    <p>Only download software from official, trusted sources</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-wifi"></i>
+                    <h3>Secure Networks</h3>
+                    <p>Avoid sensitive activities on public Wi-Fi networks</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Cyber Awareness Game. Building safer digital habits through interactive learning.</p>
+        </footer>
+    </div>
+
+    <script src="utils/storage.js"></script>
+    <script src="utils/feedback.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
