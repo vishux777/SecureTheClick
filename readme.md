@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is an interactive cybersecurity training application featuring three different games designed to teach users about various security threats and best practices. The application is built as a client-side web application using vanilla HTML, CSS, and JavaScript, with local storage for persistence.
+This is an interactive web-based cybersecurity training game that teaches users about various cyber threats through engaging mini-games. The application features multiple game modules covering different aspects of cybersecurity including phishing detection, password security, social engineering, malware identification, and data privacy.
 
 ## User Preferences
 
@@ -11,117 +11,66 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Technology Stack**: Vanilla HTML5, CSS3, and JavaScript (ES6+)
-- **Architecture Pattern**: Component-based structure with separate game modules
-- **Styling**: Custom CSS with modern features (gradients, flexbox, animations)
-- **Icons**: Font Awesome 6.0.0 via CDN
-- **Responsive Design**: Mobile-first approach with viewport meta tags
+- **Technology Stack**: Pure HTML5, CSS3, and vanilla JavaScript
+- **Design Pattern**: Modular JavaScript classes with utility services
+- **UI Framework**: Custom CSS with FontAwesome icons for consistent theming
+- **Responsive Design**: Mobile-first approach with flexbox and CSS Grid layouts
 
-### File Structure
-```
-/
-├── index.html              # Main landing page
-├── styles.css              # Global styles
-├── script.js               # Main application logic
-├── games/                  # Individual game modules
-│   ├── phishing-drag-drop.html
-│   ├── phishing-drag-drop.js
-│   ├── social-engineering-match.html
-│   ├── social-engineering-match.js
-│   ├── spot-the-danger.html
-│   └── spot-the-danger.js
-└── utils/                  # Shared utilities
-    ├── storage.js          # Local storage management
-    └── feedback.js         # User feedback system
-```
+### File Organization
+- **Main Files**: `index.html`, `styles.css`, `script.js` serve as the landing page and core application
+- **Game Modules**: Individual games located in `/games/` directory with paired HTML and JS files
+- **Utilities**: Shared services in `/utils/` directory for storage and feedback systems
 
 ## Key Components
 
-### 1. Main Application (`script.js`)
-- **CyberAwarenessGame Class**: Central application controller
-- **Responsibilities**: Statistics management, navigation, display updates
-- **Storage Integration**: Loads and updates user progress across sessions
+### Core Game Engine
+- **Main Application Class**: `CyberAwarenessGame` manages the overall application state
+- **Individual Game Classes**: Each game (phishing, password strength, etc.) has its own dedicated class
+- **Utility Services**: `GameStorage` for data persistence and `FeedbackSystem` for user notifications
 
-### 2. Game Modules
-Each game is self-contained with its own HTML and JavaScript files:
+### Game Modules
+1. **Phishing Detective**: Drag-and-drop interface for identifying email threats
+2. **Social Engineering Match**: Matching game connecting attack techniques with descriptions
+3. **Spot the Danger**: Click-to-find security threats in various interfaces
+4. **Password Strength Analyzer**: Interactive password creation and validation
+5. **Wi-Fi Security Simulator**: Scenario-based network security decisions
+6. **Malware Identification**: File analysis and threat detection
+7. **Data Privacy Quiz**: Knowledge-based quiz on privacy regulations
 
-#### Phishing Detective (`phishing-drag-drop.js`)
-- **Interaction Pattern**: Drag and drop gameplay
-- **Learning Focus**: Email security and phishing identification
-- **Mechanics**: Users drag suspicious elements from emails to appropriate zones
-
-#### Social Engineering Match (`social-engineering-match.js`)
-- **Interaction Pattern**: Click-to-match gameplay
-- **Learning Focus**: Social engineering techniques and definitions
-- **Mechanics**: Match attack techniques with their descriptions
-
-#### Spot the Danger (`spot-the-danger.js`)
-- **Interaction Pattern**: Click-to-identify gameplay
-- **Learning Focus**: Interface security and suspicious elements
-- **Mechanics**: Find dangerous elements in simulated interfaces
-
-### 3. Utility Systems
-
-#### Storage System (`storage.js`)
-- **Purpose**: Manages all persistent data using localStorage
-- **Data Structure**: JSON-based storage with error handling
-- **Features**: Statistics tracking, best scores, game history, user settings
-
-#### Feedback System (`feedback.js`)
-- **Purpose**: Provides user notifications and feedback
-- **Implementation**: Dynamic DOM manipulation for toast-style messages
-- **Features**: Message queuing, different notification types, auto-dismiss
+### Shared Components
+- **Score Management**: Persistent scoring system across all games
+- **Feedback System**: Toast notifications and visual feedback
+- **Storage Service**: LocalStorage-based data persistence
+- **Timer System**: Game duration tracking and display
 
 ## Data Flow
 
-### Application Initialization
-1. Main application loads and initializes storage system
-2. Statistics are retrieved from localStorage
-3. Display is updated with current user progress
-4. Event listeners are set up for navigation
-
-### Game Flow
-1. User selects a game from the main menu
-2. Navigation function redirects to specific game HTML
-3. Game-specific JavaScript loads and initializes
-4. Game state is managed independently
-5. Scores and progress are saved to localStorage
-6. Feedback system provides real-time user guidance
-
-### Data Persistence
-- All data is stored locally using browser localStorage
-- No server-side database or external storage required
-- Data includes: scores, completion statistics, game history, settings
+1. **Game Launch**: User selects game from main menu → Individual game initializes
+2. **Score Tracking**: Game events → Score updates → Storage service → Display refresh
+3. **Progress Persistence**: Game completion → Statistics update → LocalStorage save
+4. **Cross-Game Communication**: Storage events trigger display updates across browser tabs
 
 ## External Dependencies
 
-### CDN Dependencies
-- **Font Awesome 6.0.0**: Icon library for UI elements
-- **URL**: `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css`
-
-### Browser APIs
-- **localStorage**: For data persistence
-- **DOM Events**: For user interactions and navigation
-- **CSS3 Features**: Gradients, animations, flexbox, transforms
+- **FontAwesome 6.0.0**: Icon library served via CDN for consistent UI iconography
+- **No Backend Required**: Fully client-side application with no server dependencies
+- **Browser Storage**: Relies on localStorage for all data persistence
 
 ## Deployment Strategy
 
-### Current Architecture
-- **Static Files**: All files are client-side static assets
+### Static Hosting Ready
 - **No Build Process**: Direct deployment of source files
-- **No Server Requirements**: Can be hosted on any static file server
+- **CDN Compatibility**: All assets can be served statically
+- **Progressive Enhancement**: Core functionality works without JavaScript
 
-### Hosting Options
-- Static hosting services (Netlify, Vercel, GitHub Pages)
-- CDN deployment
-- Simple web server (Apache, Nginx)
+### Browser Requirements
+- **Modern Browser Support**: ES6+ features used throughout
+- **localStorage Support**: Required for score persistence
+- **CSS Grid/Flexbox**: For responsive layouts
 
-### Browser Compatibility
-- Modern browsers with ES6+ support
-- localStorage API support required
-- CSS3 features may degrade gracefully on older browsers
+### Performance Considerations
+- **Lazy Loading**: Games load individually when accessed
+- **Minimal Dependencies**: Only one external dependency (FontAwesome)
+- **Efficient Storage**: Compact JSON serialization for game data
 
-### Future Considerations
-- Could be enhanced with a backend for user accounts and progress sync
-- Progressive Web App (PWA) features could be added
-- Analytics integration for learning effectiveness tracking
+The application follows a modular architecture where each game is self-contained but shares common utilities and styling. The design prioritizes simplicity, maintainability, and educational effectiveness over complex technical solutions.
