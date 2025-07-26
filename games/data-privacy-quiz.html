@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Privacy Quiz - Cyber Awareness Game</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <div class="game-title">
+                <i class="fas fa-user-shield"></i>
+                <h1>Data Privacy Quiz</h1>
+            </div>
+            <div class="game-controls">
+                <button class="btn btn-secondary" id="hintBtn">
+                    <i class="fas fa-lightbulb"></i> Hint (<span id="hintsLeft">3</span>)
+                </button>
+                <a href="../index.html" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Main Menu
+                </a>
+            </div>
+        </header>
+
+        <div class="score-display">
+            <div class="score-item">
+                <i class="fas fa-star"></i>
+                <span>Score: <span id="currentScore">0</span></span>
+            </div>
+            <div class="score-item">
+                <i class="fas fa-clock"></i>
+                <span>Time: <span id="timeDisplay">0:00</span></span>
+            </div>
+            <div class="score-item">
+                <i class="fas fa-question-circle"></i>
+                <span>Question: <span id="currentQuestion">1</span>/<span id="totalQuestions">15</span></span>
+            </div>
+            <div class="score-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Correct: <span id="correctAnswers">0</span></span>
+            </div>
+        </div>
+
+        <main class="game-area">
+            <div class="game-instructions">
+                <h2>Instructions</h2>
+                <p>Test your knowledge about data privacy, GDPR, personal information protection, and digital rights. Choose the best answer for each question.</p>
+            </div>
+
+            <div class="quiz-container" id="quizContainer">
+                <div class="quiz-question" id="questionContainer">
+                    <div class="question-text" id="questionText">
+                        Loading question...
+                    </div>
+                    <div class="quiz-options" id="optionsContainer">
+                        <!-- Options will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="question-feedback" id="questionFeedback" style="display: none;">
+                    <div class="feedback-content">
+                        <h4 id="feedbackTitle"></h4>
+                        <p id="feedbackText"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="privacy-facts" id="privacyFacts">
+                <h4><i class="fas fa-info-circle"></i> Privacy Facts:</h4>
+                <div class="facts-grid">
+                    <div class="fact-item">
+                        <i class="fas fa-globe-europe"></i>
+                        <span>GDPR protects EU citizens' data worldwide</span>
+                    </div>
+                    <div class="fact-item">
+                        <i class="fas fa-trash"></i>
+                        <span>You have the right to delete your data</span>
+                    </div>
+                    <div class="fact-item">
+                        <i class="fas fa-eye"></i>
+                        <span>You can access all data companies have about you</span>
+                    </div>
+                    <div class="fact-item">
+                        <i class="fas fa-ban"></i>
+                        <span>You can opt out of data processing</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-controls-bottom">
+                <button class="btn btn-success" id="submitAnswer" disabled>
+                    <i class="fas fa-check"></i> Submit Answer
+                </button>
+                <button class="btn btn-primary" id="nextQuestion" style="display: none;">
+                    <i class="fas fa-arrow-right"></i> Next Question
+                </button>
+                <button class="btn btn-secondary" id="skipQuestion">
+                    <i class="fas fa-forward"></i> Skip Question
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="../utils/storage.js"></script>
+    <script src="../utils/feedback.js"></script>
+    <script src="data-privacy-quiz.js"></script>
+</body>
+</html>

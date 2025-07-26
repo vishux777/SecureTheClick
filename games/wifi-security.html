@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spot the Danger - Cyber Awareness Game</title>
+    <title>Wi-Fi Security Simulator - Cyber Awareness Game</title>
     <link rel="stylesheet" href="../styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -11,8 +11,8 @@
     <div class="game-container">
         <header class="game-header">
             <div class="game-title">
-                <i class="fas fa-search"></i>
-                <h1>Spot the Danger</h1>
+                <i class="fas fa-wifi"></i>
+                <h1>Wi-Fi Security Simulator</h1>
             </div>
             <div class="game-controls">
                 <button class="btn btn-secondary" id="hintBtn">
@@ -34,34 +34,48 @@
                 <span>Time: <span id="timeDisplay">0:00</span></span>
             </div>
             <div class="score-item">
-                <i class="fas fa-crosshairs"></i>
-                <span>Found: <span id="foundCount">0</span>/<span id="totalDangers">0</span></span>
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Scenario: <span id="currentScenario">1</span>/5</span>
             </div>
             <div class="score-item">
-                <i class="fas fa-layer-group"></i>
-                <span>Scenario: <span id="currentScenario">1</span>/5</span>
+                <i class="fas fa-shield-alt"></i>
+                <span>Safe Choices: <span id="safeChoices">0</span></span>
             </div>
         </div>
 
         <main class="game-area">
             <div class="game-instructions">
                 <h2>Instructions</h2>
-                <p>Click on dangerous or suspicious elements in each interface. Look for security threats, malicious links, suspicious downloads, and other cyber dangers.</p>
+                <p>You're in different locations looking for Wi-Fi networks. Choose the safest option for each scenario and learn about network security best practices.</p>
             </div>
 
-            <div id="scenarioContainer" class="danger-scenario">
-                <!-- Scenarios will be loaded here -->
+            <div class="scenario-container" id="scenarioContainer">
+                <div class="scenario-info">
+                    <h3 id="scenarioTitle">Loading...</h3>
+                    <p id="scenarioDescription">Loading scenario...</p>
+                </div>
+
+                <div class="wifi-networks" id="wifiNetworks">
+                    <!-- Networks will be populated by JavaScript -->
+                </div>
+
+                <div class="security-tips" id="securityTips">
+                    <h4><i class="fas fa-shield-alt"></i> Security Tips:</h4>
+                    <ul id="tipsList">
+                        <!-- Tips will be populated by JavaScript -->
+                    </ul>
+                </div>
             </div>
 
             <div class="game-controls-bottom">
-                <button class="btn btn-success" id="checkAnswers">
-                    <i class="fas fa-check"></i> Check Results
+                <button class="btn btn-success" id="submitChoice" disabled>
+                    <i class="fas fa-check"></i> Connect to Selected Network
                 </button>
                 <button class="btn btn-primary" id="nextScenario" style="display: none;">
                     <i class="fas fa-arrow-right"></i> Next Scenario
                 </button>
                 <button class="btn btn-danger" id="resetScenario">
-                    <i class="fas fa-redo"></i> Reset Scenario
+                    <i class="fas fa-redo"></i> Reset Choice
                 </button>
             </div>
         </main>
@@ -69,6 +83,6 @@
 
     <script src="../utils/storage.js"></script>
     <script src="../utils/feedback.js"></script>
-    <script src="spot-the-danger.js"></script>
+    <script src="wifi-security.js"></script>
 </body>
 </html>

@@ -1,136 +1,231 @@
-class PhishingDragDropGame {
+// Phishing Detective Drag and Drop Game
+class PhishingGame {
     constructor() {
         this.storage = new GameStorage();
         this.feedback = new FeedbackSystem();
-        this.currentLevel = 1;
+        this.currentRound = 1;
+        this.maxRounds = 5;
         this.score = 0;
-        this.maxLevel = 5;
-        this.emails = this.generateEmails();
+        this.hintsLeft = 3;
+        this.startTime = Date.now();
+        this.draggedElements = [];
+        this.correctAnswers = {};
         this.init();
     }
 
     init() {
         this.setupEventListeners();
-        this.loadLevel();
+        this.loadRound();
         this.updateDisplay();
+        this.feedback.gameStarted('Phishing Detective');
     }
 
-    generateEmails() {
-        return [
-            {
-                level: 1,
-                from: "security@paypal.com",
-                subject: "Verify Your Account",
-                content: `
-                    <div class="email-header">
-                        <strong>From:</strong> <span class="draggable safe">security@paypal.com</span><br>
-                        <strong>Subject:</strong> Verify Your Account
+    setupEventListeners() {
+        // Hint button
+        document.getElementById('hintBtn').addEventListener('click', () => {
+            this.showHint();
+        });
+
+        // Check answers button
+        document.getElementById('checkAnswers').addEventListener('click', () => {
+            this.checkAnswers();
+        });
+
+        // Next round button
+        document.getElementById('nextRound').addEventListener('click', () => {
+            this.nextRound();
+        });
+
+        // Reset round button
+        document.getElementById('resetRound').addEventListener('click', () => {
+            this.resetRound();
+        });
+    }
+
+    loadRound() {
+        const gameContent = document.getElementById('gameContent');
+        const scenario = this.getScenario(this.currentRound);
+        
+        gameContent.innerHTML = `
+            <div class="email-container">
+                <div class="email-header">
+                    <div class="email-from">
+                        <strong>From:</strong> 
+                        <span class="draggable" data-type="${scenario.fromType}" data-id="from">
+                            ${scenario.from}
+                        </span>
                     </div>
-                    <div class="email-body">
-                        <p>Dear valued customer,</p>
-                        <p>We noticed unusual activity on your account. Please <span class="draggable dangerous">click here immediately</span> to verify your identity.</p>
-                        <p>If you don't verify within <span class="draggable dangerous">24 hours</span>, your account will be <span class="draggable dangerous">permanently suspended</span>.</p>
-                        <p><a href="#" class="draggable dangerous">http://paypal-security.suspicious-site.com/verify</a></p>
-                        <p>Thank you,<br>
-                        <span class="draggable safe">PayPal Security Team</span></p>
+                    <div class="email-subject">
+                        <strong>Subject:</strong> ${scenario.subject}
                     </div>
-                `
+                </div>
+                <div class="email-body">
+                    ${scenario.body}
+                </div>
+            </div>
+        `;
+
+        this.setupDragAndDrop();
+        this.correctAnswers = scenario.correctAnswers;
+        this.updateButtons();
+    }
+
+    getScenario(round) {
+        const scenarios = {
+            1: {
+                from: "security@paypaI.com",
+                fromType: "suspicious-sender",
+                subject: "Urgent: Account Verification Required",
+                body: `
+                    Dear Customer,
+                    <br><br>
+                    <span class="draggable" data-type="urgent-threat" data-id="urgent1">
+                        Your account will be suspended within 24 hours
+                    </span> if you don't verify your information immediately.
+                    <br><br>
+                    Please <span class="draggable" data-type="suspicious-link" data-id="link1">
+                        click here to verify your account
+                    </span> and provide your 
+                    <span class="draggable" data-type="personal-info" data-id="info1">
+                        login credentials and social security number
+                    </span>.
+                    <br><br>
+                    Thank you,
+                    <br>PayPal Security Team
+                `,
+                correctAnswers: {
+                    "suspicious-sender": ["from"],
+                    "urgent-threat": ["urgent1"],
+                    "suspicious-link": ["link1"],
+                    "personal-info": ["info1"]
+                }
             },
-            {
-                level: 2,
-                from: "noreply@amazon.com",
-                subject: "Your Order #AMZ123456",
-                content: `
-                    <div class="email-header">
-                        <strong>From:</strong> <span class="draggable dangerous">noreply@amaz0n.com</span><br>
-                        <strong>Subject:</strong> Your Order #AMZ123456
-                    </div>
-                    <div class="email-body">
-                        <p>Hello,</p>
-                        <p>Your recent order has been <span class="draggable dangerous">cancelled due to payment issues</span>.</p>
-                        <p>To resolve this, please <span class="draggable dangerous">download the attached file</span> and run it on your computer.</p>
-                        <p><span class="draggable dangerous">Attachment: invoice.exe</span></p>
-                        <p>Or visit: <span class="draggable dangerous">www.amazon-support.tk/resolve</span></p>
-                        <p>Order Total: <span class="draggable safe">$127.99</span></p>
-                        <p>Best regards,<br>
-                        <span class="draggable safe">Amazon Customer Service</span></p>
-                    </div>
-                `
+            2: {
+                from: "noreply@amazon-security.net",
+                fromType: "suspicious-sender",
+                subject: "Suspicious Activity Detected",
+                body: `
+                    Hello,
+                    <br><br>
+                    We've detected 
+                    <span class="draggable" data-type="urgent-threat" data-id="urgent2">
+                        unauthorized access to your account from Russia
+                    </span>. 
+                    <span class="draggable" data-type="urgent-threat" data-id="urgent3">
+                        Act now to prevent account closure!
+                    </span>
+                    <br><br>
+                    <span class="draggable" data-type="suspicious-link" data-id="link2">
+                        Download our security tool immediately
+                    </span> and enter your 
+                    <span class="draggable" data-type="personal-info" data-id="info2">
+                        password and credit card details
+                    </span> to secure your account.
+                    <br><br>
+                    Amazon Security
+                `,
+                correctAnswers: {
+                    "suspicious-sender": ["from"],
+                    "urgent-threat": ["urgent2", "urgent3"],
+                    "suspicious-link": ["link2"],
+                    "personal-info": ["info2"]
+                }
             },
-            {
-                level: 3,
-                from: "admin@yourcompany.com",
-                subject: "URGENT: System Maintenance",
-                content: `
-                    <div class="email-header">
-                        <strong>From:</strong> <span class="draggable dangerous">admin@y0urcompany.com</span><br>
-                        <strong>Subject:</strong> URGENT: System Maintenance
-                    </div>
-                    <div class="email-body">
-                        <p>All Staff,</p>
-                        <p>We are performing <span class="draggable dangerous">emergency maintenance</span> on our systems.</p>
-                        <p><span class="draggable dangerous">Provide your login credentials</span> by replying to this email to maintain access.</p>
-                        <p>Username: _______</p>
-                        <p>Password: _______</p>
-                        <p><span class="draggable dangerous">This is extremely urgent</span> - failure to comply will result in account lockout.</p>
-                        <p>Time: <span class="draggable safe">3:00 PM EST</span></p>
-                        <p>IT Department</p>
-                    </div>
-                `
+            3: {
+                from: "it-support@company-server.tk",
+                fromType: "suspicious-sender",
+                subject: "Email Storage Quota Exceeded",
+                body: `
+                    IT Department Notice:
+                    <br><br>
+                    <span class="draggable" data-type="urgent-threat" data-id="urgent4">
+                        Your email will be deleted in 2 hours
+                    </span> due to storage limits.
+                    <br><br>
+                    To prevent data loss, 
+                    <span class="draggable" data-type="suspicious-link" data-id="link3">
+                        click this secure link
+                    </span> and confirm your 
+                    <span class="draggable" data-type="personal-info" data-id="info3">
+                        username, password, and backup email
+                    </span>.
+                    <br><br>
+                    <span class="draggable" data-type="suspicious-link" data-id="link4">
+                        http://bit.ly/email-backup-urgent
+                    </span>
+                    <br><br>
+                    IT Support Team
+                `,
+                correctAnswers: {
+                    "suspicious-sender": ["from"],
+                    "urgent-threat": ["urgent4"],
+                    "suspicious-link": ["link3", "link4"],
+                    "personal-info": ["info3"]
+                }
             },
-            {
-                level: 4,
-                from: "winner@lottery-international.org",
-                subject: "CONGRATULATIONS! You've Won $50,000!",
-                content: `
-                    <div class="email-header">
-                        <strong>From:</strong> <span class="draggable dangerous">winner@lottery-international.org</span><br>
-                        <strong>Subject:</strong> <span class="draggable dangerous">CONGRATULATIONS! You've Won $50,000!</span>
-                    </div>
-                    <div class="email-body">
-                        <p><span class="draggable dangerous">WINNER!</span></p>
-                        <p>You have been selected in our <span class="draggable dangerous">international lottery</span>!</p>
-                        <p>Prize Amount: <span class="draggable dangerous">$50,000 USD</span></p>
-                        <p>To claim your prize, please <span class="draggable dangerous">send $500 processing fee</span> to:</p>
-                        <p><span class="draggable dangerous">Bitcoin Address: 1A2B3C4D5E6F...</span></p>
-                        <p><span class="draggable dangerous">Act now - offer expires in 48 hours!</span></p>
-                        <p>Reference Number: <span class="draggable safe">LTR-2025-001</span></p>
-                        <p>Lottery Commission</p>
-                    </div>
-                `
+            4: {
+                from: "winner@lottery-international.biz",
+                fromType: "suspicious-sender",
+                subject: "CONGRATULATIONS! You've Won $1,000,000",
+                body: `
+                    CONGRATULATIONS WINNER!
+                    <br><br>
+                    You have been selected in our international lottery! 
+                    <span class="draggable" data-type="urgent-threat" data-id="urgent5">
+                        Claim your prize within 48 hours or lose it forever!
+                    </span>
+                    <br><br>
+                    To claim your winnings, provide your 
+                    <span class="draggable" data-type="personal-info" data-id="info4">
+                        full name, address, phone number, and bank account details
+                    </span>.
+                    <br><br>
+                    <span class="draggable" data-type="suspicious-link" data-id="link5">
+                        Click here to claim your prize now!
+                    </span>
+                    <br><br>
+                    International Lottery Commission
+                `,
+                correctAnswers: {
+                    "suspicious-sender": ["from"],
+                    "urgent-threat": ["urgent5"],
+                    "suspicious-link": ["link5"],
+                    "personal-info": ["info4"]
+                }
             },
-            {
-                level: 5,
-                from: "ceo@company.com",
-                subject: "Wire Transfer Request - Confidential",
-                content: `
-                    <div class="email-header">
-                        <strong>From:</strong> <span class="draggable dangerous">ceo@c0mpany.com</span><br>
-                        <strong>Subject:</strong> Wire Transfer Request - Confidential
-                    </div>
-                    <div class="email-body">
-                        <p>Hi [Employee Name],</p>
-                        <p>I need you to <span class="draggable dangerous">process an urgent wire transfer</span>.</p>
-                        <p>Amount: <span class="draggable dangerous">$25,000</span></p>
-                        <p>To: <span class="draggable dangerous">Offshore Account #123456789</span></p>
-                        <p><span class="draggable dangerous">Keep this confidential</span> - it's for a sensitive acquisition.</p>
-                        <p><span class="draggable dangerous">Use the new banking system</span> I sent you the link for.</p>
-                        <p>Time is critical - <span class="draggable dangerous">complete by end of day</span>.</p>
-                        <p>Date: <span class="draggable safe">January 15, 2025</span></p>
-                        <p>Thanks,<br>CEO</p>
-                    </div>
-                `
+            5: {
+                from: "ceo@your-company.co.in",
+                fromType: "suspicious-sender",
+                subject: "Urgent: Wire Transfer Request",
+                body: `
+                    Dear Finance Team,
+                    <br><br>
+                    <span class="draggable" data-type="urgent-threat" data-id="urgent6">
+                        I need you to process an urgent wire transfer immediately
+                    </span> for a confidential business deal.
+                    <br><br>
+                    Please transfer $50,000 to the following account and 
+                    <span class="draggable" data-type="personal-info" data-id="info5">
+                        confirm with your employee ID and banking passwords
+                    </span>.
+                    <br><br>
+                    <span class="draggable" data-type="suspicious-link" data-id="link6">
+                        Wire transfer form: secure-bank-forms.net/urgent
+                    </span>
+                    <br><br>
+                    Keep this confidential.
+                    <br>CEO
+                `,
+                correctAnswers: {
+                    "suspicious-sender": ["from"],
+                    "urgent-threat": ["urgent6"],
+                    "suspicious-link": ["link6"],
+                    "personal-info": ["info5"]
+                }
             }
-        ];
-    }
+        };
 
-    loadLevel() {
-        const email = this.emails.find(e => e.level === this.currentLevel);
-        if (email) {
-            document.getElementById('emailContainer').innerHTML = email.content;
-            this.setupDragAndDrop();
-        }
-        this.updateProgress();
+        return scenarios[round] || scenarios[1];
     }
 
     setupDragAndDrop() {
@@ -138,188 +233,215 @@ class PhishingDragDropGame {
         const dropZones = document.querySelectorAll('.drop-zone');
 
         // Setup draggable elements
-        draggables.forEach(draggable => {
-            draggable.draggable = true;
-            draggable.addEventListener('dragstart', this.handleDragStart.bind(this));
-            draggable.addEventListener('dragend', this.handleDragEnd.bind(this));
-            
-            // Touch events for mobile
-            draggable.addEventListener('touchstart', this.handleTouchStart.bind(this), {passive: false});
-            draggable.addEventListener('touchmove', this.handleTouchMove.bind(this), {passive: false});
-            draggable.addEventListener('touchend', this.handleTouchEnd.bind(this), {passive: false});
+        draggables.forEach(element => {
+            element.draggable = true;
+            element.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    id: element.dataset.id,
+                    type: element.dataset.type,
+                    text: element.textContent.trim()
+                }));
+                element.classList.add('dragging');
+            });
+
+            element.addEventListener('dragend', () => {
+                element.classList.remove('dragging');
+            });
         });
 
         // Setup drop zones
         dropZones.forEach(zone => {
-            zone.addEventListener('dragover', this.handleDragOver.bind(this));
-            zone.addEventListener('drop', this.handleDrop.bind(this));
-            zone.addEventListener('dragenter', this.handleDragEnter.bind(this));
-            zone.addEventListener('dragleave', this.handleDragLeave.bind(this));
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                this.handleDrop(zone, data);
+            });
         });
     }
 
-    handleDragStart(e) {
-        e.dataTransfer.setData('text/plain', '');
-        this.draggedElement = e.target;
-        e.target.classList.add('dragging');
-    }
-
-    handleDragEnd(e) {
-        e.target.classList.remove('dragging');
-    }
-
-    handleDragOver(e) {
-        e.preventDefault();
-    }
-
-    handleDragEnter(e) {
-        e.target.classList.add('drag-over');
-    }
-
-    handleDragLeave(e) {
-        if (!e.target.contains(e.relatedTarget)) {
-            e.target.classList.remove('drag-over');
+    handleDrop(zone, data) {
+        // Check if element is already in a zone
+        const existingItem = zone.querySelector(`[data-id="${data.id}"]`);
+        if (existingItem) {
+            return; // Already in this zone
         }
-    }
 
-    handleDrop(e) {
-        e.preventDefault();
-        e.target.classList.remove('drag-over');
-        
-        if (this.draggedElement) {
-            e.target.appendChild(this.draggedElement);
-            this.draggedElement = null;
-        }
-    }
-
-    // Touch events for mobile support
-    handleTouchStart(e) {
-        e.preventDefault();
-        this.touchElement = e.target;
-        e.target.style.opacity = '0.7';
-    }
-
-    handleTouchMove(e) {
-        e.preventDefault();
-        if (this.touchElement) {
-            const touch = e.touches[0];
-            this.touchElement.style.position = 'fixed';
-            this.touchElement.style.left = touch.clientX - 50 + 'px';
-            this.touchElement.style.top = touch.clientY - 25 + 'px';
-            this.touchElement.style.zIndex = '1000';
-        }
-    }
-
-    handleTouchEnd(e) {
-        e.preventDefault();
-        if (this.touchElement) {
-            const touch = e.changedTouches[0];
-            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-            const dropZone = elementBelow?.closest('.drop-zone');
-            
-            if (dropZone) {
-                dropZone.appendChild(this.touchElement);
+        // Remove from other zones
+        document.querySelectorAll('.drop-zone .dropped-item').forEach(item => {
+            if (item.dataset.id === data.id) {
+                item.remove();
             }
-            
-            this.touchElement.style.position = '';
-            this.touchElement.style.left = '';
-            this.touchElement.style.top = '';
-            this.touchElement.style.zIndex = '';
-            this.touchElement.style.opacity = '';
-            this.touchElement = null;
-        }
+        });
+
+        // Add to current zone
+        const droppedItem = document.createElement('div');
+        droppedItem.className = 'dropped-item';
+        droppedItem.dataset.id = data.id;
+        droppedItem.dataset.type = data.type;
+        droppedItem.innerHTML = `
+            <span>${data.text}</span>
+            <button class="remove-item" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        zone.appendChild(droppedItem);
+        this.updateButtons();
     }
 
     checkAnswers() {
-        const dangerZone = document.getElementById('dangerZone');
-        const safeZone = document.getElementById('safeZone');
-        let correct = 0;
-        let total = 0;
+        let correctCount = 0;
+        let totalExpected = 0;
 
-        // Check items in danger zone
-        const dangerItems = dangerZone.querySelectorAll('.draggable');
-        dangerItems.forEach(item => {
-            total++;
-            if (item.classList.contains('dangerous')) {
-                correct++;
-                item.style.background = 'rgba(0,255,136,0.3)';
-                item.style.border = '2px solid #00ff88';
-            } else {
-                item.style.background = 'rgba(255,107,107,0.3)';
-                item.style.border = '2px solid #ff6b6b';
-            }
+        // Count total expected answers
+        Object.values(this.correctAnswers).forEach(answers => {
+            totalExpected += answers.length;
         });
 
-        // Check items in safe zone
-        const safeItems = safeZone.querySelectorAll('.draggable');
-        safeItems.forEach(item => {
-            total++;
-            if (item.classList.contains('safe')) {
-                correct++;
-                item.style.background = 'rgba(0,255,136,0.3)';
-                item.style.border = '2px solid #00ff88';
-            } else {
-                item.style.background = 'rgba(255,107,107,0.3)';
-                item.style.border = '2px solid #ff6b6b';
+        // Check each drop zone
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const zoneType = zone.dataset.type;
+            const droppedItems = zone.querySelectorAll('.dropped-item');
+            const expectedAnswers = this.correctAnswers[zoneType] || [];
+
+            // Clear previous feedback
+            zone.classList.remove('correct', 'incorrect');
+
+            // Check if all expected items are in this zone
+            let zoneCorrect = true;
+            const foundItems = Array.from(droppedItems).map(item => item.dataset.id);
+
+            expectedAnswers.forEach(expectedId => {
+                if (foundItems.includes(expectedId)) {
+                    correctCount++;
+                } else {
+                    zoneCorrect = false;
+                }
+            });
+
+            // Check for incorrect items in this zone
+            foundItems.forEach(foundId => {
+                if (!expectedAnswers.includes(foundId)) {
+                    zoneCorrect = false;
+                }
+            });
+
+            // Apply visual feedback
+            if (expectedAnswers.length > 0) {
+                zone.classList.add(zoneCorrect ? 'correct' : 'incorrect');
             }
         });
 
         // Calculate score
-        const levelScore = Math.max(0, (correct - (total - correct)) * 10);
-        this.score += levelScore;
+        const accuracy = totalExpected > 0 ? (correctCount / totalExpected) : 0;
+        const roundScore = Math.round(accuracy * 100);
+        this.score += roundScore;
 
-        if (correct === total) {
-            this.feedback.show(`Perfect! Level ${this.currentLevel} completed!`, 'success');
-            document.getElementById('nextLevel').style.display = 'block';
+        // Show feedback
+        if (accuracy >= 0.8) {
+            this.feedback.correctAnswer(`Excellent! You identified ${correctCount}/${totalExpected} threats correctly.`);
+        } else if (accuracy >= 0.6) {
+            this.feedback.warning(`Good effort! You found ${correctCount}/${totalExpected} threats. Keep practicing!`);
         } else {
-            this.feedback.show(`${correct}/${total} correct. Try again!`, 'error');
+            this.feedback.incorrectAnswer(`You found ${correctCount}/${totalExpected} threats. Review the hints and try again.`);
         }
 
         this.updateDisplay();
-        document.getElementById('checkAnswers').disabled = true;
+        document.getElementById('checkAnswers').style.display = 'none';
+        document.getElementById('nextRound').style.display = 'inline-block';
     }
 
-    nextLevel() {
-        if (this.currentLevel < this.maxLevel) {
-            this.currentLevel++;
-            this.loadLevel();
-            document.getElementById('nextLevel').style.display = 'none';
-            document.getElementById('checkAnswers').disabled = false;
-            this.updateDisplay();
+    nextRound() {
+        if (this.currentRound < this.maxRounds) {
+            this.currentRound++;
+            this.loadRound();
+            this.clearDropZones();
         } else {
-            this.completeGame();
+            this.endGame();
         }
     }
 
-    completeGame() {
-        const stats = this.storage.getStats();
-        const newBest = Math.max(stats.bestScores.phishing, this.score);
-        
-        this.storage.updateScore('phishing', this.score, newBest);
-        this.feedback.show(`Game completed! Final score: ${this.score}`, 'success');
+    resetRound() {
+        this.clearDropZones();
+        this.updateButtons();
+    }
+
+    clearDropZones() {
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.querySelectorAll('.dropped-item').forEach(item => item.remove());
+            zone.classList.remove('correct', 'incorrect', 'drag-over');
+        });
+    }
+
+    showHint() {
+        if (this.hintsLeft <= 0) {
+            this.feedback.warning('No hints remaining!');
+            return;
+        }
+
+        const hints = {
+            1: "Look for misspelled domains (PaypaI vs PayPal), urgent deadlines, and requests for sensitive information.",
+            2: "Check the sender domain carefully, and be suspicious of urgent language and download requests.",
+            3: "IT departments rarely use external links or ask for passwords via email.",
+            4: "Lottery scams often use urgent deadlines and ask for personal/financial information upfront.",
+            5: "CEO fraud emails often bypass normal procedures and request immediate action with financial details."
+        };
+
+        this.hintsLeft--;
+        this.feedback.hintUsed(this.hintsLeft);
         
         setTimeout(() => {
-            window.location.href = '../index.html';
-        }, 3000);
+            this.feedback.info(hints[this.currentRound] || "Look carefully at sender addresses, urgent language, suspicious links, and personal information requests.", {
+                title: '💡 Hint',
+                duration: 8000
+            });
+        }, 500);
+
+        this.updateDisplay();
     }
 
     updateDisplay() {
         document.getElementById('currentScore').textContent = this.score;
-        document.getElementById('currentLevel').textContent = this.currentLevel;
+        document.getElementById('currentRound').textContent = this.currentRound;
+        document.getElementById('hintsLeft').textContent = this.hintsLeft;
+        
+        const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        document.getElementById('timeDisplay').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    updateProgress() {
-        const progress = (this.currentLevel - 1) / this.maxLevel * 100;
-        document.getElementById('progressBar').style.width = progress + '%';
+    updateButtons() {
+        const hasDroppedItems = document.querySelectorAll('.dropped-item').length > 0;
+        document.getElementById('checkAnswers').style.display = hasDroppedItems ? 'inline-block' : 'none';
+        document.getElementById('nextRound').style.display = 'none';
     }
 
-    setupEventListeners() {
-        document.getElementById('checkAnswers').addEventListener('click', () => this.checkAnswers());
-        document.getElementById('nextLevel').addEventListener('click', () => this.nextLevel());
+    endGame() {
+        const finalTime = Math.floor((Date.now() - this.startTime) / 1000);
+        const stats = this.storage.updateGameScore('phishing', this.score, finalTime);
+        
+        this.feedback.gameComplete(this.score, stats.bestScores.phishing, 'Phishing Detective');
+        
+        setTimeout(() => {
+            alert(`Game Complete!\n\nFinal Score: ${this.score}\nTime: ${Math.floor(finalTime/60)}:${(finalTime%60).toString().padStart(2,'0')}\n\nYou've completed all rounds of Phishing Detective!`);
+            window.location.href = '../index.html';
+        }, 2000);
     }
 }
 
-// Initialize the game when DOM is loaded
+// Initialize game when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new PhishingDragDropGame();
+    new PhishingGame();
 });

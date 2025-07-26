@@ -1,294 +1,279 @@
-// Local storage utility for managing game data
+// Local storage management utility
 class GameStorage {
     constructor() {
         this.storageKey = 'cyberAwarenessGame';
-        this.initializeStorage();
-    }
-
-    initializeStorage() {
-        if (!localStorage.getItem(this.storageKey)) {
-            const defaultData = {
-                totalScore: 0,
-                gamesCompleted: 0,
-                bestScores: {
-                    phishing: 0,
-                    matching: 0,
-                    spotDanger: 0
-                },
-                gameHistory: [],
-                achievements: [],
-                settings: {
-                    soundEnabled: true,
-                    difficultyLevel: 'normal',
-                    hintsEnabled: true
-                }
-            };
-            this.saveData(defaultData);
-        }
-    }
-
-    getData() {
-        try {
-            return JSON.parse(localStorage.getItem(this.storageKey)) || {};
-        } catch (error) {
-            console.error('Error parsing storage data:', error);
-            this.initializeStorage();
-            return JSON.parse(localStorage.getItem(this.storageKey));
-        }
-    }
-
-    saveData(data) {
-        try {
-            localStorage.setItem(this.storageKey, JSON.stringify(data));
-            // Trigger storage event for other windows/tabs
-            window.dispatchEvent(new Event('storage'));
-        } catch (error) {
-            console.error('Error saving data to storage:', error);
-        }
-    }
-
-    getStats() {
-        const data = this.getData();
-        return {
-            totalScore: data.totalScore || 0,
-            gamesCompleted: data.gamesCompleted || 0,
-            bestScores: data.bestScores || {
+        this.defaultStats = {
+            totalScore: 0,
+            gamesCompleted: 0,
+            bestScores: {
                 phishing: 0,
                 matching: 0,
-                spotDanger: 0
-            }
+                spotDanger: 0,
+                passwordStrength: 0,
+                wifiSecurity: 0,
+                malwareIdentification: 0,
+                dataPrivacyQuiz: 0
+            },
+            gameHistory: [],
+            settings: {
+                soundEnabled: true,
+                animationsEnabled: true,
+                difficulty: 'normal'
+            },
+            achievements: [],
+            lastPlayed: null
         };
     }
 
-    updateScore(gameType, score, isBestScore = false) {
-        const data = this.getData();
-        
-        // Update total score
-        data.totalScore = (data.totalScore || 0) + score;
-        
-        // Update best score if this is a new best
-        if (isBestScore || score > (data.bestScores[gameType] || 0)) {
-            data.bestScores[gameType] = score;
-        }
-        
-        // Increment games completed
-        data.gamesCompleted = (data.gamesCompleted || 0) + 1;
-        
-        // Add to game history
-        if (!data.gameHistory) data.gameHistory = [];
-        data.gameHistory.push({
-            gameType: gameType,
-            score: score,
-            timestamp: Date.now(),
-            date: new Date().toISOString()
-        });
-        
-        // Keep only last 50 games in history
-        if (data.gameHistory.length > 50) {
-            data.gameHistory = data.gameHistory.slice(-50);
-        }
-        
-        this.saveData(data);
-        this.checkAchievements(data);
-    }
-
-    checkAchievements(data) {
-        const achievements = data.achievements || [];
-        const newAchievements = [];
-        
-        // First Win Achievement
-        if (data.gamesCompleted >= 1 && !achievements.includes('first_win')) {
-            newAchievements.push('first_win');
-            achievements.push('first_win');
-        }
-        
-        // Score Milestones
-        if (data.totalScore >= 1000 && !achievements.includes('score_1000')) {
-            newAchievements.push('score_1000');
-            achievements.push('score_1000');
-        }
-        
-        if (data.totalScore >= 5000 && !achievements.includes('score_5000')) {
-            newAchievements.push('score_5000');
-            achievements.push('score_5000');
-        }
-        
-        // Game Completion Milestones
-        if (data.gamesCompleted >= 10 && !achievements.includes('games_10')) {
-            newAchievements.push('games_10');
-            achievements.push('games_10');
-        }
-        
-        // Perfect Scores
-        if (data.bestScores.phishing >= 200 && !achievements.includes('phishing_master')) {
-            newAchievements.push('phishing_master');
-            achievements.push('phishing_master');
-        }
-        
-        if (data.bestScores.matching >= 300 && !achievements.includes('matching_master')) {
-            newAchievements.push('matching_master');
-            achievements.push('matching_master');
-        }
-        
-        if (data.bestScores.spotDanger >= 400 && !achievements.includes('danger_spotter')) {
-            newAchievements.push('danger_spotter');
-            achievements.push('danger_spotter');
-        }
-        
-        // All Games Mastery
-        if (data.bestScores.phishing >= 150 && 
-            data.bestScores.matching >= 250 && 
-            data.bestScores.spotDanger >= 300 && 
-            !achievements.includes('cyber_expert')) {
-            newAchievements.push('cyber_expert');
-            achievements.push('cyber_expert');
-        }
-        
-        data.achievements = achievements;
-        
-        if (newAchievements.length > 0) {
-            this.saveData(data);
-            this.notifyAchievements(newAchievements);
-        }
-    }
-
-    notifyAchievements(achievements) {
-        const achievementNames = {
-            'first_win': '🎉 First Victory!',
-            'score_1000': '⭐ Score Master - 1,000 points!',
-            'score_5000': '🌟 Score Legend - 5,000 points!',
-            'games_10': '🎮 Dedicated Player - 10 games completed!',
-            'phishing_master': '🕵️ Phishing Detective Master!',
-            'matching_master': '🧠 Social Engineering Expert!',
-            'danger_spotter': '🔍 Danger Spotter Supreme!',
-            'cyber_expert': '🛡️ Cyber Security Expert!'
-        };
-        
-        achievements.forEach(achievement => {
-            if (window.feedbackSystem) {
-                setTimeout(() => {
-                    window.feedbackSystem.show(`Achievement Unlocked: ${achievementNames[achievement]}`, 'success');
-                }, 1000);
-            }
-        });
-    }
-
-    getGameHistory() {
-        const data = this.getData();
-        return data.gameHistory || [];
-    }
-
-    getAchievements() {
-        const data = this.getData();
-        return data.achievements || [];
-    }
-
-    updateSettings(newSettings) {
-        const data = this.getData();
-        data.settings = { ...data.settings, ...newSettings };
-        this.saveData(data);
-    }
-
-    getSettings() {
-        const data = this.getData();
-        return data.settings || {
-            soundEnabled: true,
-            difficultyLevel: 'normal',
-            hintsEnabled: true
-        };
-    }
-
-    exportData() {
-        return this.getData();
-    }
-
-    importData(importedData) {
+    // Get all statistics
+    getStats() {
         try {
-            // Validate imported data structure
-            if (importedData && typeof importedData === 'object') {
-                this.saveData(importedData);
+            const stored = localStorage.getItem(this.storageKey);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                // Merge with defaults to ensure all properties exist
+                return this.mergeWithDefaults(parsed);
+            }
+        } catch (error) {
+            console.error('Error loading stats from localStorage:', error);
+        }
+        return { ...this.defaultStats };
+    }
+
+    // Save statistics
+    saveStats(stats) {
+        try {
+            const toSave = {
+                ...stats,
+                lastPlayed: new Date().toISOString()
+            };
+            localStorage.setItem(this.storageKey, JSON.stringify(toSave));
+            return true;
+        } catch (error) {
+            console.error('Error saving stats to localStorage:', error);
+            return false;
+        }
+    }
+
+    // Update score for specific game
+    updateGameScore(gameType, score, timeSpent = 0) {
+        const stats = this.getStats();
+        const gameKey = this.getGameKey(gameType);
+        
+        if (gameKey && score > stats.bestScores[gameKey]) {
+            stats.bestScores[gameKey] = score;
+            stats.totalScore += (score - (stats.bestScores[gameKey] || 0));
+        }
+
+        // Add to game history
+        stats.gameHistory.push({
+            game: gameType,
+            score: score,
+            timestamp: new Date().toISOString(),
+            timeSpent: timeSpent
+        });
+
+        // Keep only last 50 game records
+        if (stats.gameHistory.length > 50) {
+            stats.gameHistory = stats.gameHistory.slice(-50);
+        }
+
+        // Update games completed count
+        stats.gamesCompleted = stats.gameHistory.length;
+
+        this.saveStats(stats);
+        return stats;
+    }
+
+    // Get game key mapping
+    getGameKey(gameType) {
+        const keyMap = {
+            'phishing': 'phishing',
+            'phishing-drag-drop': 'phishing',
+            'matching': 'matching',
+            'social-engineering-match': 'matching',
+            'spot-danger': 'spotDanger',
+            'spot-the-danger': 'spotDanger',
+            'password-strength': 'passwordStrength',
+            'wifi-security': 'wifiSecurity',
+            'malware-identification': 'malwareIdentification',
+            'data-privacy-quiz': 'dataPrivacyQuiz'
+        };
+        return keyMap[gameType];
+    }
+
+    // Merge stored data with defaults
+    mergeWithDefaults(stored) {
+        const merged = { ...this.defaultStats };
+        
+        // Merge top-level properties
+        Object.keys(stored).forEach(key => {
+            if (typeof stored[key] === 'object' && stored[key] !== null && !Array.isArray(stored[key])) {
+                merged[key] = { ...merged[key], ...stored[key] };
+            } else {
+                merged[key] = stored[key];
+            }
+        });
+
+        return merged;
+    }
+
+    // Get settings
+    getSettings() {
+        const stats = this.getStats();
+        return stats.settings;
+    }
+
+    // Update settings
+    updateSettings(newSettings) {
+        const stats = this.getStats();
+        stats.settings = { ...stats.settings, ...newSettings };
+        this.saveStats(stats);
+        return stats.settings;
+    }
+
+    // Get game history
+    getGameHistory(gameType = null, limit = 10) {
+        const stats = this.getStats();
+        let history = stats.gameHistory;
+
+        if (gameType) {
+            history = history.filter(record => record.game === gameType);
+        }
+
+        return history
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(0, limit);
+    }
+
+    // Get achievements
+    getAchievements() {
+        const stats = this.getStats();
+        return stats.achievements;
+    }
+
+    // Add achievement
+    addAchievement(achievementId, name, description) {
+        const stats = this.getStats();
+        
+        // Check if achievement already exists
+        if (!stats.achievements.find(a => a.id === achievementId)) {
+            stats.achievements.push({
+                id: achievementId,
+                name: name,
+                description: description,
+                unlockedAt: new Date().toISOString()
+            });
+            
+            this.saveStats(stats);
+            return true;
+        }
+        return false;
+    }
+
+    // Clear all data
+    clearData() {
+        try {
+            localStorage.removeItem(this.storageKey);
+            return true;
+        } catch (error) {
+            console.error('Error clearing localStorage:', error);
+            return false;
+        }
+    }
+
+    // Export data
+    exportData() {
+        const stats = this.getStats();
+        return {
+            data: stats,
+            exportDate: new Date().toISOString(),
+            version: '1.0'
+        };
+    }
+
+    // Import data
+    importData(importData) {
+        try {
+            if (importData.data && typeof importData.data === 'object') {
+                const mergedData = this.mergeWithDefaults(importData.data);
+                this.saveStats(mergedData);
                 return true;
             }
-            return false;
         } catch (error) {
             console.error('Error importing data:', error);
+        }
+        return false;
+    }
+
+    // Get storage usage info
+    getStorageInfo() {
+        try {
+            const used = JSON.stringify(this.getStats()).length;
+            const available = this.getStorageQuota();
+            
+            return {
+                used: used,
+                available: available,
+                usedFormatted: this.formatBytes(used),
+                availableFormatted: this.formatBytes(available),
+                percentUsed: available > 0 ? (used / available) * 100 : 0
+            };
+        } catch (error) {
+            console.error('Error getting storage info:', error);
+            return null;
+        }
+    }
+
+    // Get approximate storage quota
+    getStorageQuota() {
+        try {
+            // Test storage limit (rough estimate)
+            let test = 'x';
+            while (test.length < 10000000) { // 10MB test
+                try {
+                    localStorage.setItem('test', test);
+                    localStorage.removeItem('test');
+                    test += test;
+                } catch (e) {
+                    break;
+                }
+            }
+            return test.length;
+        } catch (error) {
+            return 5000000; // Default 5MB estimate
+        }
+    }
+
+    // Format bytes to human readable
+    formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Check if localStorage is available
+    isStorageAvailable() {
+        try {
+            const test = 'localStorage-test';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch (error) {
             return false;
         }
     }
+}
 
-    clearAllData() {
-        localStorage.removeItem(this.storageKey);
-        this.initializeStorage();
-    }
+// Export for use in other scripts
+if (typeof window !== 'undefined') {
+    window.GameStorage = GameStorage;
+}
 
-    // Utility method to format scores for display
-    formatScore(score) {
-        return score.toLocaleString();
-    }
-
-    // Utility method to calculate rank based on total score
-    getPlayerRank(totalScore) {
-        if (totalScore < 500) return 'Novice';
-        if (totalScore < 1500) return 'Apprentice';
-        if (totalScore < 3000) return 'Professional';
-        if (totalScore < 5000) return 'Expert';
-        if (totalScore < 10000) return 'Master';
-        return 'Grandmaster';
-    }
-
-    // Method to get performance analytics
-    getAnalytics() {
-        const data = this.getData();
-        const history = data.gameHistory || [];
-        
-        if (history.length === 0) {
-            return {
-                averageScore: 0,
-                favoriteGame: null,
-                improvementTrend: 'No data',
-                totalPlayTime: 0
-            };
-        }
-        
-        const gameTypes = ['phishing', 'matching', 'spotDanger'];
-        const gameStats = {};
-        
-        gameTypes.forEach(type => {
-            const games = history.filter(game => game.gameType === type);
-            gameStats[type] = {
-                count: games.length,
-                averageScore: games.length > 0 ? games.reduce((sum, game) => sum + game.score, 0) / games.length : 0,
-                bestScore: Math.max(...games.map(game => game.score), 0)
-            };
-        });
-        
-        const totalScore = history.reduce((sum, game) => sum + game.score, 0);
-        const averageScore = totalScore / history.length;
-        
-        // Find favorite game (most played)
-        const gameCounts = gameTypes.map(type => ({
-            type,
-            count: gameStats[type].count
-        })).sort((a, b) => b.count - a.count);
-        
-        const favoriteGame = gameCounts[0].count > 0 ? gameCounts[0].type : null;
-        
-        // Calculate improvement trend (last 5 games vs previous 5 games)
-        let improvementTrend = 'Stable';
-        if (history.length >= 10) {
-            const recent5 = history.slice(-5).reduce((sum, game) => sum + game.score, 0) / 5;
-            const previous5 = history.slice(-10, -5).reduce((sum, game) => sum + game.score, 0) / 5;
-            
-            if (recent5 > previous5 * 1.1) improvementTrend = 'Improving';
-            else if (recent5 < previous5 * 0.9) improvementTrend = 'Declining';
-        }
-        
-        return {
-            averageScore: Math.round(averageScore),
-            favoriteGame,
-            improvementTrend,
-            gamesPlayed: history.length,
-            gameStats
-        };
-    }
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = GameStorage;
 }
